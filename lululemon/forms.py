@@ -13,10 +13,14 @@ from lululemon.models import Item, UserProfile
     
 class ItemForm(forms.ModelForm):
     categories = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label=None)
+    quantity = forms.IntegerField(required=False)
+    operation = forms.ChoiceField(choices=(('check_in', 'Check In'), ('check_out', 'Check Out')), required=False)
+    checkin_quantity = forms.IntegerField(required=False)
+    checkout_quantity = forms.IntegerField(required=False)
 
     class Meta:
         model = Item
-        fields = ['staffname', 'product', 'color', 'size', 'categories']
+        fields = ['staffname', 'product', 'color', 'size', 'categories', 'quantity', 'operation', 'checkin_quantity', 'checkout_quantity']
 
 class NewItemForm(forms.ModelForm):
     categories = forms.ModelChoiceField(queryset=Category.objects.all(), empty_label=None)

@@ -35,6 +35,8 @@ urlpatterns = [
                                            authentication_form=LoginForm), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='lululemon/logout.html'), name='logout'),
     path('change_password/', ChangePasswordView.as_view(), name='password_change'),
+    path('api/', include('lululemon.urls')),
+
 ]
 urlpatterns += staticfiles_urlpatterns()
 

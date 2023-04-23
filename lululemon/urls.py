@@ -5,7 +5,7 @@ from lululemon.views import profile, RegisterView
 from lululemon.forms import LoginForm
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-
+from .views import ItemListCreateView, ItemUpdateView
 
 home_list_view = views.HomeListView.as_view (
     queryset=LogMessage.objects.order_by("-log_date") [:5], 
@@ -30,8 +30,11 @@ urlpatterns = [
     path('item/<uuid:pk>/delete/', views.item_delete, name='item_delete'),
     path('item/<int:pk>/', views.item_detail, name='item_detail'),
     # path('items/inventory_management/', InventoryManagementView.as_view(), name='inventory_management')
-    path('inventory_management/', views.inventory_management, name='inventory_management')
+    path('inventory_management/', views.inventory_management, name='inventory_management'),
     #path('items/<int:pk>/check-in/', views.check_in_item, name='check-in_item'),
     #path('items/<int:pk>/check-out/', views.check_out_item, name='check-out_item'),
+    path('api/items/', views.create_item, name='create_item'),
+    path('api/items/<uuid:pk>/', ItemUpdateView.as_view(), name='item-update'),
+    path('api/items/update_quantity/<uuid:pk>/', views.update_product_quantity, name='update_product_quantity'),
 ]
 

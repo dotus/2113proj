@@ -27,6 +27,99 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
+from rest_framework import generics
+from .models import Item
+from .serializers import ItemSerializer
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Item, Category
+import json
+import uuid
+
+class ItemListCreateView(generics.ListCreateAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+
+class ItemUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    
+@csrf_exempt
+def update_product_quantity(request, pk):
+    if request.method == 'POST':
+        item = get_object_or_404(Item, pk=pk)
+        data = json.loads(request.body)
+
+        quantity = data.get('quantity')
+        operation = data.get('operation')
+        checkin_quantity = data.get('checkin_quantity', 0)
+        checkout_quantity = data.get('checkout_quantity', 0)
+
+        if operation == 'check_in':
+            item.available_quantity += quantity
+            item.checkin_quantity += checkin_quantity or quantity
+        elif operation == 'check_out':
+            if item.available_quantity >= quantity:
+                item.available_quantity -= quantity
+                item.checkout_quantity += checkout_quantity or quantity
+            else:
+                return JsonResponse({'error': 'Invalid quantity, please input again.'}, status=400)
+                
+        item.save()
+
+        action_type = 'checkin' if operation == 'check_in' else 'checkout'
+        action = Action(item=item, action_type=action_type, quantity=quantity)
+        action.save()
+
+        return JsonResponse({'message': 'Product quantity updated successfully'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def create_item(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        # Generate UUID
+        uid = uuid.uuid4()
+
+        # Extract data from the request body
+        staff = data.get("staffname")
+        category_id = data.get("categories")
+        product = data.get("product")
+        size = data.get("size")
+        color = data.get("color")
+        available_quantity = data.get("available_quantity")
+        checkin_quantity = data.get("checkin_quantity")
+        checkout_quantity = data.get("checkout_quantity")
+        qr_code = data.get("qr_code")
+
+        try:
+            category = Category.objects.get(id=category_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({"error": "Category not found"}, status=400)
+
+        # Create and save the item
+        item = Item(
+            id=uid,
+            staffname=staff,
+            categories=category,
+            product=product,
+            size=size,
+            color=color,
+            available_quantity=available_quantity,
+            checkin_quantity=checkin_quantity,
+            checkout_quantity=checkout_quantity,
+            qr_code=qr_code
+        )
+        item.save()
+
+        return JsonResponse({"message": "Product added successfully"}, status=201)
+
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 def home(request):
  return render(request, "lululemon/home.html")
@@ -100,15 +193,7 @@ class RegisterView(View):
 
 class CustomLoginView(LoginView):
     form_class = LoginForm
-'''
-class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
-    template_name = 'lululemon/password_reset.html'
-    email_template_name = 'lululemon/password_reset_email.html'
-    #subject_template_name = 'lululemon/password_reset_subject'
-    #success_message = "We've emailed you instructions for setting your password, " \       
-    success_url = reverse_lazy('users-home')
 
-'''
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'lululemon/change_password.html'
     success_message = "Your password has been successfully changed"
@@ -184,32 +269,6 @@ def item_new(request):
     else:
         form = NewItemForm()
     return render(request, 'lululemon/item_new.html', {'form': form})
-'''
-@login_required
-def item_edit(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    if request.method == 'POST':
-        form = ItemForm(request.POST, instance=item)
-        if form.is_valid():
-            item = form.save(commit=False)
-            quantity = int(request.POST.get('quantity'))
-            operation = request.POST.get('operation')
-            if operation == 'check_in':
-                item.available_quantity += quantity
-                item.checkin_quantity += quantity
-            elif operation == 'check_out':
-                if item.available_quantity >= quantity:
-                    item.available_quantity -= quantity
-                    item.checkout_quantity += quantity
-                else:
-                    form.add_error('quantity', 'Invalid quantity, please input again.')
-                    return render(request, 'lululemon/item_edit.html', {'form': form, 'item': item})
-            item.save()
-            return redirect('item_detail', pk=item.pk)
-    else:
-        form = ItemForm(instance=item)
-    return render(request, 'lululemon/item_edit.html', {'form': form, 'item': item})
-'''
 
 @login_required
 def item_edit(request, pk):
@@ -270,39 +329,7 @@ def inventory_management(request):
     }
     return render(request, 'lululemon/inventory_management.html', context)
 
-# class InventoryManagementView(ListView):
-#     model = Action
-#     template_name = 'lululemon/inventory_management.html'
-#     context_object_name = 'actions'
 
-#     def get_queryset(self):
-#         return Action.objects.all()
-'''
-@login_required
-def checkout_item(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    checkout = CheckOut(item=item, user=request.user)
-    checkout.save()
-    item.is_available = False
-    item.save()
-    return redirect('item_detail', pk=item.pk)
-
-@login_required
-def checkin_item(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    checkout = CheckOut.objects.filter(item=item, checkin_date=None).first()
-    checkout.checkin_date = datetime.now()
-    checkout.save()
-    item.is_available = True
-    item.save()
-    return redirect('item_detail', pk=item.pk)
-
-@login_required
-def item_detail(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    checkouts = CheckOut.objects.filter(item=item)
-    return render(request, 'lululemon/item_detail.html', {'item': item, 'checkouts': checkouts})
-'''
 @login_required
 def check_in_item(request, pk):
     item = Item.objects.get(pk=pk)
