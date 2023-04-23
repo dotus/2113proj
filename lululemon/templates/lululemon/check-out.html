@@ -1,0 +1,18 @@
+{% extends "lululemon/layout.html" %}
+
+{% block content %}
+    <h1>Check Out</h1>
+    <p>Product: {{ item.product }}</p>
+    <p>Available Quantity: {{ item.available_quantity }}</p>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="check_out_quantity">Check-Out Quantity:</label>
+            <input type="number" name="check_out_quantity" id="check_out_quantity" class="form-control" min="1" max="{{ item.available_quantity }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "lululemon/layout.html" %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ item.product }}</h1>
+  <p>ID: {{ item.id }}</p>
+  <!-- <p>Category: {{ item.display_category }}</p> -->
+  <p>Category: {{ item.categories }}</p>
+  <p>Color: {{ item.color }}</p>
+  <p>Size: {{ item.size }}</p>
+  <p>Available Quantity: {{ item.available_quantity }}</p>
+  <p>Checkin Quantity: {{ item.checkin_quantity }}</p>
+  <p>Checkout Quantity: {{ item.checkout_quantity }}</p>
+  <p>Staff Name: {{ item.staffname }}</p>
+  <img src="{{ item.qr_code.url }}" alt="QR Code">
+{% endblock %}

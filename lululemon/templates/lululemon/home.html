@@ -1,0 +1,52 @@
+
+{% extends "lululemon/layout.html" %}
+{% block title %}
+    Home
+{% endblock %}
+{% block content %}
+    </p> </p>
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome,</h1>
+        <p class="lead">
+            This is <b>Homepage for lululemon store Inventory Management System.</b> 
+        </p>
+        <hr class="my-4">
+        <p class="lead">
+            {% if user.is_authenticated %}
+                <a class="btn btn-primary btn-lg" href="{% url 'logout' %}" role="button">Logout</a>
+                <div class="container">
+                    <h2>Logged Activities</u></h2>
+                    {% if message_list %}
+                        <table class="message_list"  width="700px" height="auto">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Staff</th>
+                                    <th>Product</th>
+                                    <th>13-digit QR Code</th>
+                                <hr>
+                                </tr>
+                        </thead>
+                        <tbody>
+                        {% for message in message_list %}
+                            <tr>
+                                <td>{{ message.log_date | date:'d M Y'}}  </td>
+                                <td>{{ message.log_date | time:'H:i:s'}}  </td>
+                                <td>{{ message.staffname }}</td>
+                                <td>{{ message.product }}</td>
+                                <td>{{ message.qrcode }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        </table>
+                    {% else %}
+                        <p>No activities have been logged. Use the <a href="{% url 'log' %}">Log Message form</a>.</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Sign in</a>
+            {% endif %}
+        </p>
+    </div>
+{% endblock %}

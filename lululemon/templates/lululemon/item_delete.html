@@ -1,0 +1,12 @@
+{% extends 'lululemon/layout.html' %}
+
+{% block content %}
+  <h1>Delete Item</h1>
+  <p>Are you sure you want to delete this item?</p>
+  <form method="post">
+    {% csrf_token %}
+    <p>{{ item.product }}</p>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'item_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

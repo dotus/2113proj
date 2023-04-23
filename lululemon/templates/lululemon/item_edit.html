@@ -1,0 +1,20 @@
+{% extends "lululemon/layout.html" %}
+
+{% block content %}
+  <h1>Edit Item</h1>
+  <p>Available quantity: {{ available_quantity }}</p>
+  <p>Check-in quantity: {{ checkin_quantity }}</p>
+  <p>Check-out quantity: {{ checkout_quantity }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="quantity">Update Quantity:</label>
+    <input type="number" id="quantity" name="quantity" min="0" required>
+    <label for="operation">Operation:</label>
+    <select id="operation" name="operation" required>
+      <option value="check_in">Check-in</option>
+      <option value="check_out">Check-out</option>
+    </select>
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}

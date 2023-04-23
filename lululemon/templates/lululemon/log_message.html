@@ -1,0 +1,32 @@
+{% extends "lululemon/layout.html" %}
+{% block title %}
+    Log an Activity
+{% endblock %}
+{% block content %}
+     <form method="POST" class="log-form">
+        {% csrf_token %}
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="label" for="subject">Enter Username</label>
+                    <input type="text" class="form-control" name="staffname" id="subject" placeholder="Username">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="label" for="subject">Enter Product Name</label>
+                    <input type="text" class="form-control" name="product" id="subject" placeholder="Product Name">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="label" for="subject">Enter 13-digit QR Code</label>
+                    <input type="text" class="form-control" name="qrcode" id="subject" placeholder="13-digit QR Code">
+                </div>
+            </div>
+        </div>
+        <button name="checkin_form" type="submit" class="save btn btn-dark">Check In</button>
+        <button name="checkout_form" type="submit" class="save btn btn-dark">Check Out</button>
+    </form>
+{% endblock %}

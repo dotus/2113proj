@@ -1,0 +1,15 @@
+{% extends "lululemon/layout.html" %}
+
+{% block content %}
+    <h1>Check In</h1>
+    <p>Product: {{ item.product }}</p>
+    <p>Available Quantity: {{ item.available_quantity }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="check_in_quantity">Check-In Quantity:</label>
+            <input type="number" name="check_in_quantity" id="check_in_quantity" class="form-control" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
